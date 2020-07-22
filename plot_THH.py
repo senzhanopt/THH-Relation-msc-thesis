@@ -24,7 +24,7 @@ def voltage_thermalNeutral(t): # Celsius degree
 
 def voltage_cell(t, i): # [A/cm^2]
     T = 273.15 + t # [K]
-    m = 7.64 # molality for 30% KOH solution (mol/L)
+    m = 7.64 # molality for 30% KOH solution (mol/kg)
     pw_water = exp(37.04 - 6276/T - 3.416 * log(T)) #vapour pressure of water
     pw_KOH = exp(0.01621 - 0.1380 * m + 0.1933 * m**0.5 + 1.024 * log(pw_water)) #vapour pressure of KOH solution
     voltage_rev = 1.5184 - 1.5421E-3 * T + 9.523E-5 * T * log(T) + 9.84E-8 * T**2
