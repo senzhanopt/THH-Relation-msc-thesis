@@ -43,6 +43,15 @@ def voltage_cell(t, i): # [A/cm^2]
     Vohm = i * r
     return voltage_rev + Vact_anode + Vact_cathode + Vohm
 
+def voltage_rev(t): # [A/cm^2]
+    T = 273.15 + t # [K]
+    m = 7.64 # molality for 30% KOH solution (mol/kg)
+    pw_water = exp(37.04 - 6276/T - 3.416 * log(T)) #vapour pressure of water
+    pw_KOH = exp(0.01621 - 0.1380 * m + 0.1933 * m**0.5 + 1.024 * log(pw_water)) #vapour pressure of KOH solution
+    voltage_rev = 1.5184 - 1.5421E-3 * T + 9.523E-5 * T * log(T) + 9.84E-8 * T**2
+    voltage_rev += R * T / (n * F) * log((p-pw_KOH)**1.5 * pw_water / pw_KOH)
+    return voltage_rev
+
 t_set = []
 P_H2_set = []
 P_heat_set = []
@@ -71,8 +80,8 @@ fig2 = plt.figure()
 ax2 = fig2.add_subplot(111)
 for t in [60,65,70,75,80]:
     ax2.plot(P_H2_set[(t-60)*21:(t-59)*21], P_heat_set[(t-60)*21:(t-59)*21], label = "{}$^\circ$C".format(t))
-ax2.set_xlabel('$P_{H2}$[kW]', fontsize = 12)
-ax2.set_ylabel('$P_{Heat}$[kW]', fontsize = 12)
+ax2.set_xlabel('$P_{H2}$[kW]', fontsize = 15)
+ax2.set_ylabel('$P_{Heat}$[kW]', fontsize = 15)
 ax2.legend()
 plt.savefig("hh.eps")
 plt.show()
@@ -99,8 +108,47 @@ fig4 = plt.figure()
 ax4 = fig4.add_subplot(111)
 for t in [60,65,70,75,80]:
     ax4.plot(np.linspace(0.2,0.4,21), [(P_heat_set[ind]/P_H2_set[ind]) for ind in range((t-60)*21, (t-59)*21)], label = "{}$^\circ$C".format(t))
-ax4.set_xlabel('current density[$A/cm^2$]', fontsize = 12)
-ax4.set_ylabel('$P_{Heat}/P_{H2}$', fontsize = 12)
+ax4.set_xlabel('current density[$A/cm^2$]', fontsize = 15)
+ax4.set_ylabel('$P_{Heat}/P_{H2}$', fontsize = 15)
 ax4.legend()
 plt.savefig("ratio.eps")
+plt.show()
+
+
+fig5 = plt.figure()
+ax5 = fig5.add_subplot(111)
+for t in [60,65,70,75,80]:
+    ax5.plot(np.linspace(0,0.4,81), [voltage_rev(t)] + [voltage_cell(t,i/200) for i in range(1,81)], label = "{}$^\circ$C".format(t))
+ax5.set_xlabel('current density[$A/cm^2$]', fontsize = 15)
+ax5.set_ylabel('$voltage[V]$', fontsize = 15)
+ax5.legend()
+plt.savefig("polartization.eps")
+plt.show()
+
+fig6 = plt.figure()
+ax6 = fig6.add_subplot(111)
+ax6.plot(np.linspace(60,80,21), [voltage_thermalNeutral(i) for i in range(60,81)])
+ax6.set_xlabel('t[$^\circ$C]', fontsize = 15)
+ax6.set_ylabel('$voltage[V]$', fontsize = 15)
+plt.savefig("thermalNeutral.eps")
+plt.show()
+
+fig7 = plt.figure()
+ax7 = fig7.add_subplot(111)
+for t in [60,65,70,75,80]:
+    ax7.plot(np.linspace(0.2,0.4,21), [(P_heat_set[ind]/(P_H2_set[ind]+P_heat_set[ind])) for ind in range((t-60)*21, (t-59)*21)], label = "{}$^\circ$C".format(t))
+ax7.set_xlabel('current density[$A/cm^2$]', fontsize = 15)
+ax7.set_ylabel('$P_{Heat}/P_{P2HH}$', fontsize = 15)
+ax7.legend()
+plt.savefig("heatratio.eps")
+plt.show()
+
+fig8 = plt.figure()
+ax8 = fig8.add_subplot(111)
+for t in [60,65,70,75,80]:
+    ax8.plot(np.linspace(0.2,0.4,21), [(P_H2_set[ind]/(P_H2_set[ind]+P_heat_set[ind])) for ind in range((t-60)*21, (t-59)*21)], label = "{}$^\circ$C".format(t))
+ax8.set_xlabel('current density[$A/cm^2$]', fontsize = 15)
+ax8.set_ylabel('$P_{H2}/P_{P2HH}$', fontsize = 15)
+ax8.legend()
+plt.savefig("h2ratio.eps")
 plt.show()
